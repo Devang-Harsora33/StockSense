@@ -20,6 +20,8 @@ dependencies:
   get:
   intl:
   file_picker:
+  currency_text_input_formatter: 
+  simple_barcode_scanner: 
 
 
 dev_dependencies:
