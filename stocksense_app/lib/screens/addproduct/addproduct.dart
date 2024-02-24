@@ -8,7 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:intl/intl.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 import '../../constants/colors.dart';
@@ -27,7 +26,7 @@ class _AddProductState extends State<AddProduct> {
   TextEditingController _productRate = new TextEditingController();
   TextEditingController _productProfit = new TextEditingController();
   TextEditingController _transportationCost = new TextEditingController();
-  var _productBarCodeData;
+  String _productBarCodeData = "";
   String _productImage = "";
 
   final formKey = GlobalKey<FormState>();
@@ -120,7 +119,9 @@ class _AddProductState extends State<AddProduct> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+          backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           scrolledUnderElevation: 0.0,
           toolbarHeight: 100,
@@ -262,34 +263,63 @@ class _AddProductState extends State<AddProduct> {
                     hint: "Enter Transportation Cost",
                     error: "Enter Transportation Cost",
                     controller: _transportationCost),
-                InkWell(
-                  onTap: () => scanBarcode(),
-                  child: Container(
-                    margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                    height: 60,
-                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: primaryColor,
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                        ),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Scan Barcode Data',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                            fontSize: 15,
-                            color: Colors.white,
+                Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    _productBarCodeData == ""
+                        ? const SizedBox()
+                        : Container(
+                            margin: const EdgeInsets.fromLTRB(0, 0, 0, 15),
+                            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                            width: double.infinity,
+                            height: 30,
+                            decoration: BoxDecoration(
+                                color: thirdColor,
+                                border: Border.all(
+                                  color: Colors.grey.shade200,
+                                ),
+                                borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(10),
+                                    bottomRight: Radius.circular(10))),
+                            child: Center(
+                              child: Text(_productBarCodeData.toString(),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w300,
+                                      color: secondaryColor,
+                                      fontSize: 15)),
+                            ),
+                          ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                          0, 0, 0, _productBarCodeData == "" ? 0 : 40),
+                      child: InkWell(
+                        onTap: () => scanBarcode(),
+                        child: Container(
+                          margin: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                          height: 60,
+                          padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Scan Barcode Data',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 15,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              Icon(Icons.barcode_reader, color: Colors.white),
+                            ],
                           ),
                         ),
-                        Icon(Icons.barcode_reader, color: Colors.white),
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 InkWell(
                   onTap: () => pickFile(),
@@ -300,9 +330,6 @@ class _AddProductState extends State<AddProduct> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                         color: primaryColor,
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                        ),
                         borderRadius: BorderRadius.circular(10)),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -387,7 +414,7 @@ Widget customInputCard({title, hint, error, controller}) {
           child: TextFormField(
             inputFormatters: [
               CurrencyTextInputFormatter(
-                  locale: 'en_IN', decimalDigits: 0, symbol: "₹ ")
+                  locale: 'en_IN', decimalDigits: 0, symbol: "")
             ],
             keyboardType: TextInputType.number,
             validator: (value) {

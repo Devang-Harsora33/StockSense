@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stocksense_app/main.dart';
 import 'package:stocksense_app/screens/addproduct/addproduct.dart';
+import 'package:stocksense_app/screens/product/myproducts.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -20,7 +22,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: InkWell(
-          onTap: () => Get.to(() => const AddProduct()),
+          onTap: () => Get.off(() => const MyProducts()),
           child: Center(child: const Text("Home"))),
     );
   }
