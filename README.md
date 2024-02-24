@@ -1,0 +1,2 @@
+# StockSense
+Smart Inventory System
