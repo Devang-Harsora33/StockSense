@@ -4,8 +4,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:intl/intl.dart';
+import 'package:money_formatter/money_formatter.dart';
 
 import '../../constants/colors.dart';
+import '../home/home.dart';
 
 class Productinfo extends StatefulWidget {
   var product_id;
@@ -40,6 +43,69 @@ class _ProductinfoState extends State<Productinfo> {
     });
   }
 
+  Future addToInventory() async {
+    //add to inventory
+    if (_quantity.text.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection(DateFormat('MMMM yyyy').format(DateTime.now()).toString())
+          .doc()
+          .set({
+        "product_id": widget.product_id,
+        "product_name": receivedData['product_name'],
+        "product_image": receivedData['product_image'],
+        "product_rate": receivedData['product_rate'],
+        "product_profit": receivedData['product_profit'],
+        "product_description": receivedData['product_description'],
+        "product_barcodedata": receivedData['product_barcodedata'],
+        "transportation_cost": receivedData['transportation_cost'],
+        'created_time': DateTime.now(),
+        "total_quantity": _quantity.text,
+        'quantity_sold': '0',
+        "total_profit": '0',
+      }).then((value) async {
+        var amount_invested = (int.parse(receivedData['amount_invested']
+                    .toString()
+                    .split(",")
+                    .join()
+                    .toString()) +
+                (int.parse(receivedData['product_rate']
+                        .toString()
+                        .split(",")
+                        .join()
+                        .toString()) *
+                    int.parse(_quantity.text)))
+            .toString();
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('products')
+            .doc(widget.product_id)
+            .update({
+          'amount_invested':
+              MoneyFormatter(amount: double.parse(amount_invested))
+                  .output
+                  .withoutFractionDigits,
+        });
+
+        Get.snackbar(
+          "Success",
+          "Product Added to Inventory",
+        );
+        Get.offAll(() => const Home(), transition: Transition.fadeIn);
+
+        _quantity.clear();
+      });
+    } else {
+      Get.snackbar(
+        "Error",
+        "Please Enter Quantity",
+      );
+    }
+  }
+
+  var _quantity = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +166,9 @@ class _ProductinfoState extends State<Productinfo> {
           )),
       body: receivedData == null
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: primaryColor,
+              ),
             )
           : Padding(
               padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
@@ -431,7 +499,7 @@ class _ProductinfoState extends State<Productinfo> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
-                                    "Net Profit",
+                                    "Total Profit",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         color: Colors.white,
@@ -439,7 +507,7 @@ class _ProductinfoState extends State<Productinfo> {
                                         fontWeight: FontWeight.w500),
                                   ),
                                   Text(
-                                    "₹ " + receivedData['net_profit'],
+                                    "₹ " + receivedData['total_profit'],
                                     style: const TextStyle(
                                         color: Colors.white,
                                         fontSize: 25,
@@ -455,65 +523,66 @@ class _ProductinfoState extends State<Productinfo> {
               ),
             ),
       bottomNavigationBar: Container(
-        height: 100,
+        height: 110,
+        margin: MediaQuery.of(context).viewInsets,
         padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Row(
           children: [
             Expanded(
+              flex: 1,
               child: Container(
-                margin: EdgeInsets.fromLTRB(0, 10, 2, 0),
+                height: 80,
+                margin: EdgeInsets.fromLTRB(0, 0, 3, 0),
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                 decoration: BoxDecoration(
-                    color: primaryColor,
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Amount Invested",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500),
+                    TextFormField(
+                      validator: (value) {
+                        if (value!.isEmpty) return "Enter Product Name";
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      controller: _quantity,
+                      keyboardType: TextInputType.number,
+                      cursorColor: Colors.black,
+                      decoration: const InputDecoration(
+                        hintText: "Quantity",
+                        hintStyle: TextStyle(
+                            fontWeight: FontWeight.w300, color: secondaryColor),
+                        border: InputBorder.none,
+                      ),
                     ),
-                    Text(
-                      "₹ " + receivedData['amount_invested'],
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500),
-                    )
                   ],
                 ),
               ),
             ),
             Expanded(
-              child: Container(
-                margin: EdgeInsets.fromLTRB(2, 10, 0, 0),
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Net Profit",
+              flex: 2,
+              child: InkWell(
+                onTap: () {
+                  addToInventory();
+                },
+                child: Container(
+                  height: 80,
+                  margin: EdgeInsets.fromLTRB(3, 0, 0, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(10)),
+                  child: const Center(
+                    child: Text(
+                      "Add to Current Inventory",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
-                    Text(
-                      "₹ " + receivedData['net_profit'],
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.w500),
-                    )
-                  ],
+                  ),
                 ),
               ),
             )

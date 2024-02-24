@@ -55,7 +55,7 @@ class _AddProductState extends State<AddProduct> {
           'created_time': DateTime.now(),
           'product_id': '',
           'amount_invested': '0',
-          'net_profit': '0',
+          'total_profit': '0',
         });
 
         await FirebaseFirestore.instance

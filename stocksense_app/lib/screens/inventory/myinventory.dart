@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/route_manager.dart';
+import 'package:intl/intl.dart';
+import 'package:money_formatter/money_formatter.dart';
 import 'package:stocksense_app/screens/addproduct/addproduct.dart';
 import 'package:stocksense_app/screens/product/productinfo.dart';
 import 'package:stocksense_app/screens/widget/bottomnavbar.dart';
@@ -11,14 +15,14 @@ import '../../constants/colors.dart';
 import '../home/home.dart';
 import '../initial/splashscreen.dart';
 
-class MyProducts extends StatefulWidget {
-  const MyProducts({super.key});
+class MyInventory extends StatefulWidget {
+  const MyInventory({super.key});
 
   @override
-  State<MyProducts> createState() => _MyProductsState();
+  State<MyInventory> createState() => _MyInventoryState();
 }
 
-class _MyProductsState extends State<MyProducts> {
+class _MyInventoryState extends State<MyInventory> {
   @override
   void initState() {
     // TODO: implement initState
@@ -94,7 +98,7 @@ class _MyProductsState extends State<MyProducts> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'My Products',
+              'My Inventory',
               style:
                   TextStyle(color: secondaryColor, fontWeight: FontWeight.w600),
             ),
@@ -106,7 +110,9 @@ class _MyProductsState extends State<MyProducts> {
                 stream: FirebaseFirestore.instance
                     .collection('users')
                     .doc(FirebaseAuth.instance.currentUser!.uid)
-                    .collection("products")
+                    .collection(DateFormat('MMMM yyyy')
+                        .format(DateTime.now())
+                        .toString())
                     .orderBy('product_name')
                     .snapshots(),
                 builder: (context, snapshot) {
@@ -138,6 +144,10 @@ class _MyProductsState extends State<MyProducts> {
                                   documentSnapshot['product_profit'],
                               product_id: documentSnapshot['product_id'],
                               product_image: documentSnapshot['product_image'],
+                              quantity_sold: documentSnapshot['quantity_sold'],
+                              total_quantity:
+                                  documentSnapshot['total_quantity'],
+                              id: documentSnapshot.id,
                             ),
                           );
                         });
@@ -148,7 +158,7 @@ class _MyProductsState extends State<MyProducts> {
           ],
         ),
       ),
-      bottomNavigationBar: Bottomnavbar(3),
+      bottomNavigationBar: Bottomnavbar(1),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: Container(
         height: 55,
@@ -172,7 +182,11 @@ class _MyProductsState extends State<MyProducts> {
       product_rate,
       product_profit,
       product_id,
-      product_image}) {
+      product_image,
+      quantity_sold,
+      total_quantity,
+      id}) {
+    var sale_ratio = (int.parse(quantity_sold) / int.parse(total_quantity));
     return InkWell(
       onTap: () => Get.to(
         () => Productinfo(product_id),
@@ -182,7 +196,11 @@ class _MyProductsState extends State<MyProducts> {
           margin: const EdgeInsets.only(bottom: 10),
           height: 110,
           decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: sale_ratio >= 0.5
+                  ? Colors.green.shade50
+                  : sale_ratio <= 0.5 && sale_ratio > 0
+                      ? Colors.red.shade50
+                      : Colors.grey.shade50,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.grey.shade100)),
           child: Row(
@@ -351,22 +369,134 @@ class _MyProductsState extends State<MyProducts> {
                 padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
                 child: InkWell(
                   onTap: () async {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection("products")
-                        .doc(product_id)
-                        .delete()
-                        .then((value) => {
-                              Get.snackbar(
-                                "Success",
-                                "Product Deleted Successfully",
-                              )
-                            });
+                    try {
+                      if (int.parse(quantity_sold) ==
+                          int.parse(total_quantity)) {
+                        Get.snackbar(
+                          "Error",
+                          "Product Quantity is already sold out",
+                        );
+                        return;
+                      }
+                      var total_profit;
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection('products')
+                          .doc(product_id)
+                          .get()
+                          .then((value) =>
+                              {total_profit = value['total_profit']});
+                      var profit_to_add = (int.parse(total_profit
+                              .toString()
+                              .split(",")
+                              .join()
+                              .toString()) +
+                          int.parse(product_profit
+                              .toString()
+                              .split(",")
+                              .join()
+                              .toString()));
+
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection(DateFormat('MMMM yyyy')
+                              .format(DateTime.now())
+                              .toString())
+                          .doc(id)
+                          .update({
+                        'quantity_sold':
+                            (int.parse(quantity_sold) + 1).toString(),
+                      });
+
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(FirebaseAuth.instance.currentUser!.uid)
+                          .collection('products')
+                          .doc(product_id)
+                          .update({
+                        'total_profit': MoneyFormatter(
+                                amount: double.parse(profit_to_add.toString()))
+                            .output
+                            .withoutFractionDigits,
+                      });
+
+                      Get.snackbar(
+                        "Success",
+                        "Product Quantity Modified",
+                      );
+                    } on FirebaseException catch (e) {
+                      Get.snackbar(
+                        "Error",
+                        e.message.toString(),
+                      );
+                    }
                   },
-                  child: Icon(
-                    Icons.delete_outline_outlined,
-                    color: secondaryColor,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(
+                        width: 50,
+                        height: 50,
+                        margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                        decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Column(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 5,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 3,
+                              child: Text(quantity_sold,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16)),
+                            ),
+                            Divider(
+                              height: 1,
+                              color: Colors.white,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                  borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10))),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Text(total_quantity,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                            color: secondaryColor,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 10)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                                color: Colors.grey.shade200, width: 1),
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(7)),
+                        child: Icon(Icons.add, color: secondaryColor, size: 15),
+                      ),
+                    ],
                   ),
                 ),
               ),
