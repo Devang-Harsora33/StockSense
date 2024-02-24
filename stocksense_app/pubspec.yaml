@@ -1,0 +1,43 @@
+name: stocksense_app
+description: 74_DevDynasty BitnBuild'24.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.6 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.2
+  firebase_core: 
+  firebase_auth: 
+  firebase_storage:
+  cloud_firestore: 
+  flutter_svg:
+  get:
+  intl:
+  file_picker:
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/svg/
+    - assets/png/
+
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+
