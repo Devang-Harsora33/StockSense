@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "430403147975",
+    "project_id": "stocksense-bitnbuild",
+    "storage_bucket": "stocksense-bitnbuild.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:430403147975:android:7868e225a541c4c14a06e2",
+        "android_client_info": {
+          "package_name": "com.example.stocksense_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWhKXb_ZIpHMgJau1jRaErd0W-WM8qot0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
