@@ -203,6 +203,7 @@ class _ProductinfoState extends State<Productinfo> {
                       ),
                       Text(
                         receivedData['product_description'],
+                        textAlign: TextAlign.justify,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 5,
                         style: const TextStyle(
@@ -452,6 +453,9 @@ class _ProductinfoState extends State<Productinfo> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(
+                        height: 20,
                       ),
                       Row(
                         children: [
