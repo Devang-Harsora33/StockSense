@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csv/csv.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +10,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/route_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:money_formatter/money_formatter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share/share.dart';
 import 'package:stocksense_app/screens/addproduct/addproduct.dart';
 import 'package:stocksense_app/screens/product/productinfo.dart';
 import 'package:stocksense_app/screens/widget/bottomnavbar.dart';
 import 'package:stocksense_app/screens/widget/floatingactionbutton.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../constants/colors.dart';
 import '../home/home.dart';
@@ -44,6 +51,39 @@ class _MyInventoryState extends State<MyInventory> {
         .format(DateTime.now().subtract(const Duration(days: 150))),
   ];
   var active_month = DateFormat('MMMM yyyy').format(DateTime.now());
+
+  Future<void> _exportDataToCSV() async {
+    if (!(await Permission.storage.request()).isGranted) {
+      Permission.storage.request();
+      return;
+    }
+
+    // Get the documents from Firestore
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection(active_month)
+        .get();
+
+    // Create a list of documents
+    var documents = [];
+    querySnapshot.docs.forEach((doc) {
+      documents.add(doc.data());
+    });
+
+    // Convert the list of documents to CSV
+    var csvData = documents.map((doc) => [doc]).toList();
+
+    // Write the CSV data to a file
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/data.csv');
+    await file.writeAsString(const ListToCsvConverter().convert(csvData));
+    debugPrint('CSV file created at: ${file.path}');
+
+    // Share the file
+    Share.shareFiles([file.path], text: 'Sharing CSV file');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,10 +153,35 @@ class _MyInventoryState extends State<MyInventory> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'My Inventory',
-                style: TextStyle(
-                    color: secondaryColor, fontWeight: FontWeight.w600),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'My Inventory',
+                    style: TextStyle(
+                        color: secondaryColor, fontWeight: FontWeight.w600),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      _exportDataToCSV();
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                      decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: primaryColor)),
+                      child: const Text(
+                        'Export to CSV',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12),
+                      ),
+                    ),
+                  )
+                ],
               ),
               SizedBox(
                 height: 20,

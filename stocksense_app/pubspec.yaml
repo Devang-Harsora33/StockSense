@@ -23,6 +23,11 @@ dependencies:
   currency_text_input_formatter: 
   simple_barcode_scanner: 
   money_formatter: ^0.0.5
+  csv: ^5.1.1
+  path_provider: ^2.1.2
+  url_launcher: 
+  permission_handler: ^10.4.5
+  share: ^2.0.4
 
 
 dev_dependencies:

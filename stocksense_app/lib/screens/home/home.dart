@@ -153,235 +153,241 @@ class _HomeState extends State<Home> {
               ],
             ),
           )),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 0, 0, 20),
-            child: const Text(
-              'Stats at Glance',
-              style:
-                  TextStyle(color: secondaryColor, fontWeight: FontWeight.w600),
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: Container(
-                    margin: const EdgeInsets.fromLTRB(25, 0, 5, 0),
-                    height: 180,
-                    decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.payments_outlined,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          "Total Investment",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          total_investment_str.toString(),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    )),
-              ),
-              Expanded(
-                child: Container(
-                    margin: const EdgeInsets.fromLTRB(5, 0, 25, 0),
-                    height: 180,
-                    decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.savings_outlined,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        const Text(
-                          "Total Profit",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          total_profit_str.toString(),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600),
-                        )
-                      ],
-                    )),
-              )
-            ],
-          ),
-          Container(
-              margin: const EdgeInsets.fromLTRB(25, 10, 25, 10),
-              height: 100,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(20)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Icon(
-                    Icons.shopping_bag_outlined,
-                    color: Colors.black,
-                    size: 40,
-                  ),
-                  const Text(
-                    "Total Products",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    total_products.toString(),
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600),
-                  )
-                ],
-              )),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 20, 0, 20),
-            child: const Text(
-              'Recent Inventory Additions',
-              style:
-                  TextStyle(color: secondaryColor, fontWeight: FontWeight.w600),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-            child: SizedBox(
-              height: 120,
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser!.uid)
-                    .collection(DateFormat('MMMM yyyy').format(DateTime.now()))
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox(
-                      height: 160,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  } else if (snapshot.data!.docs.isEmpty) {
-                    return const SizedBox(
-                      height: 160,
-                      child: Center(
-                        child: Text("No Inventory Found for given month"),
-                      ),
-                    );
-                  } else {
-                    return PageView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot documentSnapshot =
-                              snapshot.data!.docs[index];
-                          return Card(
-                            product_name: documentSnapshot['product_name'],
-                            product_description:
-                                documentSnapshot['product_description'],
-                            product_rate: documentSnapshot['product_rate'],
-                            product_profit: documentSnapshot['product_profit'],
-                            product_id: documentSnapshot['product_id'],
-                            product_image: documentSnapshot['product_image'],
-                            quantity_sold: documentSnapshot['quantity_sold'],
-                            total_quantity: documentSnapshot['total_quantity'],
-                            id: documentSnapshot.id,
-                          );
-                        });
-                  }
-                },
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 0, 20),
+              child: const Text(
+                'Stats at Glance',
+                style: TextStyle(
+                    color: secondaryColor, fontWeight: FontWeight.w600),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 20, 0, 5),
-            child: const Text(
-              'Add a New Product',
-              style:
-                  TextStyle(color: secondaryColor, fontWeight: FontWeight.w600),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                      margin: const EdgeInsets.fromLTRB(25, 0, 5, 0),
+                      height: 180,
+                      decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.payments_outlined,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            "Total Investment",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            total_investment_str.toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      )),
+                ),
+                Expanded(
+                  child: Container(
+                      margin: const EdgeInsets.fromLTRB(5, 0, 25, 0),
+                      height: 180,
+                      decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.savings_outlined,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            "Total Profit",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            total_profit_str.toString(),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      )),
+                )
+              ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(25, 0, 25, 20),
-            child: Text(
-              'Easily add a new product to your inventory by storing it.',
-              style: TextStyle(
-                  color: Colors.grey.shade400,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12),
-            ),
-          ),
-          InkWell(
-            onTap: () => Get.to(() => const AddProduct(),
-                transition: Transition.rightToLeft),
-            child: Container(
-              margin: const EdgeInsets.fromLTRB(25, 10, 25, 0),
-              height: 60,
-              padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  color: primaryColor, borderRadius: BorderRadius.circular(10)),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Scan Barcode Data',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 15,
-                      color: Colors.white,
+            Container(
+                margin: const EdgeInsets.fromLTRB(25, 10, 25, 10),
+                height: 100,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    color: Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Icon(
+                      Icons.shopping_bag_outlined,
+                      color: Colors.black,
+                      size: 40,
                     ),
-                  ),
-                  Icon(Icons.barcode_reader, color: Colors.white),
-                ],
+                    const Text(
+                      "Total Products",
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      total_products.toString(),
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600),
+                    )
+                  ],
+                )),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 20, 0, 20),
+              child: const Text(
+                'Recent Inventory Additions',
+                style: TextStyle(
+                    color: secondaryColor, fontWeight: FontWeight.w600),
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+              child: SizedBox(
+                height: 120,
+                child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .collection(
+                          DateFormat('MMMM yyyy').format(DateTime.now()))
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox(
+                        height: 160,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    } else if (snapshot.data!.docs.isEmpty) {
+                      return const SizedBox(
+                        height: 160,
+                        child: Center(
+                          child: Text("No Inventory Found for given month"),
+                        ),
+                      );
+                    } else {
+                      return PageView.builder(
+                          itemCount: snapshot.data!.docs.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context, index) {
+                            DocumentSnapshot documentSnapshot =
+                                snapshot.data!.docs[index];
+                            return Card(
+                              product_name: documentSnapshot['product_name'],
+                              product_description:
+                                  documentSnapshot['product_description'],
+                              product_rate: documentSnapshot['product_rate'],
+                              product_profit:
+                                  documentSnapshot['product_profit'],
+                              product_id: documentSnapshot['product_id'],
+                              product_image: documentSnapshot['product_image'],
+                              quantity_sold: documentSnapshot['quantity_sold'],
+                              total_quantity:
+                                  documentSnapshot['total_quantity'],
+                              id: documentSnapshot.id,
+                            );
+                          });
+                    }
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 20, 0, 5),
+              child: const Text(
+                'Add a New Product',
+                style: TextStyle(
+                    color: secondaryColor, fontWeight: FontWeight.w600),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(25, 0, 25, 20),
+              child: Text(
+                'Easily add a new product to your inventory by storing it.',
+                style: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12),
+              ),
+            ),
+            InkWell(
+              onTap: () => Get.to(() => const AddProduct(),
+                  transition: Transition.rightToLeft),
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(25, 10, 25, 0),
+                height: 60,
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Scan Barcode Data',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Icon(Icons.barcode_reader, color: Colors.white),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: Floatingactionbutton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
