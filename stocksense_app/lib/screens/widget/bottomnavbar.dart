@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:stocksense_app/screens/admin/admin.dart';
 import 'package:stocksense_app/screens/inventory/myinventory.dart';
 import 'package:stocksense_app/screens/product/myproducts.dart';
 
@@ -52,14 +53,14 @@ class _BottomnavbarState extends State<Bottomnavbar> {
             label: ''),
         BottomNavigationBarItem(
             icon: Icon(
-              Icons.inventory_2_outlined,
+              Icons.category_outlined,
             ),
             label: 'My Products'),
         BottomNavigationBarItem(
             icon: Icon(
-              Icons.inventory_2_outlined,
+              Icons.admin_panel_settings_outlined,
             ),
-            label: 'Nearby Sellers')
+            label: 'Admin')
       ],
       onTap: (value) {
         if (value == 0) {
@@ -70,6 +71,9 @@ class _BottomnavbarState extends State<Bottomnavbar> {
         }
         if (value == 3) {
           Get.offAll(() => const MyProducts(), transition: Transition.fadeIn);
+        }
+        if (value == 4) {
+          Get.offAll(() => const Admin(), transition: Transition.fadeIn);
         }
       },
     );
