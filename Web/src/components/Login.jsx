@@ -48,21 +48,6 @@ export default function Login() {
   // const [isHovered, setIsHovered] = useState(false);
   // const [redirectToHome, setRedirectToHome] = useState(false);
   const [currentUser, getCurrentUser] = useState({});
-  const handleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider)
-      .then((result) => {
-        // Handle successful sign-in
-        const user = result.user;
-        // console.log(user);
-        getCurrentUser(result.user);
-        // console.log(currentUser)
-      })
-      .catch((error) => {
-        // Handle error
-        console.log(error);
-      });
-  };
 
   // const handleSignUp1 = () => {
   //   createUserWithEmailAndPassword(auth, email, password)
@@ -349,7 +334,7 @@ export default function Login() {
                     className="text-emerald_green hover:text-dark_emerald_green cursor-pointer transition-all ease-in-out"
                     onClick={() => setIsLogin(true)}
                   >
-                    Sign in
+                    Log in
                   </b>
                 </p>
                 <button
