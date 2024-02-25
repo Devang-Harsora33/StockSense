@@ -10,6 +10,7 @@ import 'package:money_formatter/money_formatter.dart';
 import 'package:stocksense_app/screens/addproduct/addproduct.dart';
 import 'package:stocksense_app/screens/product/productinfo.dart';
 import 'package:stocksense_app/screens/widget/bottomnavbar.dart';
+import 'package:stocksense_app/screens/widget/floatingactionbutton.dart';
 
 import '../../constants/colors.dart';
 import '../home/home.dart';
@@ -29,113 +30,163 @@ class _MyInventoryState extends State<MyInventory> {
     super.initState();
   }
 
+  var months = [
+    DateFormat('MMMM yyyy').format(DateTime.now()),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 30))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 60))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 90))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 120))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 150))),
+  ];
+  var active_month = DateFormat('MMMM yyyy').format(DateTime.now());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          scrolledUnderElevation: 0.0,
-          toolbarHeight: 100,
-          title: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "StockSense",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: primaryColor,
-                              fontSize: 24),
-                        ),
-                        Text(
-                          FirebaseAuth.instance.currentUser!.displayName != null
-                              ? "Hey, ${FirebaseAuth.instance.currentUser!.displayName} "
-                              : "Hey, User",
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                              fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      width: 47,
-                      height: 47,
-                      decoration: BoxDecoration(
-                          color: thirdColor,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+            backgroundColor: Colors.white,
+            scrolledUnderElevation: 0.0,
+            toolbarHeight: 100,
+            title: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          InkWell(
-                              onTap: () async {
-                                await FirebaseAuth.instance.signOut();
-                                Get.offAll(const SplashScreen(),
-                                    transition: Transition.circularReveal);
-                              },
-                              child: const Icon(Icons.logout_outlined)),
+                          const Text(
+                            "StockSense",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: primaryColor,
+                                fontSize: 24),
+                          ),
+                          Text(
+                            FirebaseAuth.instance.currentUser!.displayName !=
+                                    null
+                                ? "Hey, ${FirebaseAuth.instance.currentUser!.displayName} "
+                                : "Hey, User",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                                fontSize: 16),
+                          ),
                         ],
                       ),
-                    ),
+                      Container(
+                        width: 47,
+                        height: 47,
+                        decoration: BoxDecoration(
+                            color: thirdColor,
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            InkWell(
+                                onTap: () async {
+                                  await FirebaseAuth.instance.signOut();
+                                  Get.offAll(const SplashScreen(),
+                                      transition: Transition.circularReveal);
+                                },
+                                child: const Icon(Icons.logout_outlined)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(
+                    color: Colors.grey.shade300,
+                  )
+                ],
+              ),
+            )),
+        body: Padding(
+          padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'My Inventory',
+                style: TextStyle(
+                    color: secondaryColor, fontWeight: FontWeight.w600),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                height: 50,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    for (var i = 0; i < months.length; i++)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            active_month = months[i];
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 5, bottom: 10),
+                          padding: const EdgeInsets.fromLTRB(15, 10, 15, 0),
+                          decoration: BoxDecoration(
+                              color: active_month == months[i]
+                                  ? primaryColor
+                                  : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.grey.shade100)),
+                          child: Text(
+                            months[i],
+                            style: TextStyle(
+                                color: active_month == months[i]
+                                    ? Colors.white
+                                    : secondaryColor,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
-                Divider(
-                  color: Colors.grey.shade300,
-                )
-              ],
-            ),
-          )),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'My Inventory',
-              style:
-                  TextStyle(color: secondaryColor, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Expanded(
-              child: StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(FirebaseAuth.instance.currentUser!.uid)
-                    .collection(DateFormat('MMMM yyyy')
-                        .format(DateTime.now())
-                        .toString())
-                    .orderBy('product_name')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return const SizedBox(
-                      height: 160,
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    );
-                  } else {
-                    return ListView.builder(
-                        itemCount: snapshot.data!.docs.length,
-                        scrollDirection: Axis.vertical,
-                        itemBuilder: (context, index) {
-                          DocumentSnapshot documentSnapshot =
-                              snapshot.data!.docs[index];
-                          return InkWell(
-                            onTap: () {
-                              // Get.to(CaseDetails(documentSnapshot),
-                              //     transition: Transition.downToUp);
-                            },
-                            child: Card(
+              ),
+              Expanded(
+                child: StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .collection(active_month)
+                      .orderBy('product_name')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox(
+                        height: 160,
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    } else if (snapshot.data!.docs.isEmpty) {
+                      return const SizedBox(
+                        height: 160,
+                        child: Center(
+                          child: Text("No Inventory Found for given month"),
+                        ),
+                      );
+                    } else {
+                      return ListView.builder(
+                          itemCount: snapshot.data!.docs.length,
+                          scrollDirection: Axis.vertical,
+                          itemBuilder: (context, index) {
+                            DocumentSnapshot documentSnapshot =
+                                snapshot.data!.docs[index];
+                            return Card(
                               product_name: documentSnapshot['product_name'],
                               product_description:
                                   documentSnapshot['product_description'],
@@ -148,32 +199,18 @@ class _MyInventoryState extends State<MyInventory> {
                               total_quantity:
                                   documentSnapshot['total_quantity'],
                               id: documentSnapshot.id,
-                            ),
-                          );
-                        });
-                  }
-                },
+                            );
+                          });
+                    }
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: Bottomnavbar(1),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Container(
-        height: 55,
-        child: FloatingActionButton(
-          onPressed: () {
-            Get.to(const AddProduct(), transition: Transition.fadeIn);
-          },
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
+            ],
           ),
-          backgroundColor: primaryColor,
         ),
-      ),
-    );
+        bottomNavigationBar: Bottomnavbar(1),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: Floatingactionbutton());
   }
 
   Widget Card(
@@ -187,7 +224,7 @@ class _MyInventoryState extends State<MyInventory> {
       total_quantity,
       id}) {
     var sale_ratio = (int.parse(quantity_sold) / int.parse(total_quantity));
-    return InkWell(
+    return GestureDetector(
       onTap: () => Get.to(
         () => Productinfo(product_id),
       ),

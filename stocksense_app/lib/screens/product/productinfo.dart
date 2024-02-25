@@ -30,7 +30,7 @@ class _ProductinfoState extends State<Productinfo> {
 
   Future fetchData() async {
     //fetch data from firebase
-    FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection("users")
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection('products')

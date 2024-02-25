@@ -124,21 +124,14 @@ class _MyProductsState extends State<MyProducts> {
                         itemBuilder: (context, index) {
                           DocumentSnapshot documentSnapshot =
                               snapshot.data!.docs[index];
-                          return InkWell(
-                            onTap: () {
-                              // Get.to(CaseDetails(documentSnapshot),
-                              //     transition: Transition.downToUp);
-                            },
-                            child: Card(
-                              product_name: documentSnapshot['product_name'],
-                              product_description:
-                                  documentSnapshot['product_description'],
-                              product_rate: documentSnapshot['product_rate'],
-                              product_profit:
-                                  documentSnapshot['product_profit'],
-                              product_id: documentSnapshot['product_id'],
-                              product_image: documentSnapshot['product_image'],
-                            ),
+                          return Card(
+                            product_name: documentSnapshot['product_name'],
+                            product_description:
+                                documentSnapshot['product_description'],
+                            product_rate: documentSnapshot['product_rate'],
+                            product_profit: documentSnapshot['product_profit'],
+                            product_id: documentSnapshot['product_id'],
+                            product_image: documentSnapshot['product_image'],
                           );
                         });
                   }
@@ -173,7 +166,7 @@ class _MyProductsState extends State<MyProducts> {
       product_profit,
       product_id,
       product_image}) {
-    return InkWell(
+    return GestureDetector(
       onTap: () => Get.to(
         () => Productinfo(product_id),
       ),
