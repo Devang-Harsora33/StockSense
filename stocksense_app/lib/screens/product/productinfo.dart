@@ -679,7 +679,7 @@ class _ProductinfoState extends State<Productinfo> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Rate Change Analysis",
+                            "Profit Change Analysis",
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
