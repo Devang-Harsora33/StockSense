@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
@@ -9,6 +12,7 @@ import 'package:money_formatter/money_formatter.dart';
 
 import '../../constants/colors.dart';
 import '../home/home.dart';
+import 'package:http/http.dart' as http;
 
 class Productinfo extends StatefulWidget {
   var product_id;
@@ -24,9 +28,54 @@ class _ProductinfoState extends State<Productinfo> {
     // TODO: implement initState
     super.initState();
     fetchData();
+    calculateGraph();
   }
 
   var receivedData;
+  var graph;
+
+  var header_list = [];
+  var data_list = [];
+  var months = [
+    DateFormat('MMMM yyyy').format(DateTime.now()),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 30))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 60))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 90))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 120))),
+    DateFormat('MMMM yyyy')
+        .format(DateTime.now().subtract(const Duration(days: 150))),
+  ];
+
+  Future calculateGraph() async {
+    for (var i = 0; i < months.length; i++) {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection(months[i])
+          .where('product_id', isEqualTo: widget.product_id)
+          .get()
+          .then((value) {
+        var total_quantity = 0;
+        var quantity_sold = 0;
+        var ratio = 0.0;
+        value.docs.forEach((element) {
+          total_quantity += int.parse(element['total_quantity']);
+          quantity_sold += int.parse(element['quantity_sold']);
+
+          ratio = (quantity_sold / total_quantity) * 100;
+        });
+        header_list.add("'" + months[i].substring(0, 3).toString() + "'");
+        data_list.add(ratio);
+      });
+    }
+    setState(() {
+      print(header_list.toString());
+    });
+  }
 
   Future fetchData() async {
     //fetch data from firebase
@@ -522,6 +571,26 @@ class _ProductinfoState extends State<Productinfo> {
                             ),
                           )
                         ],
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: NetworkImage(
+                                  "https://quickchart.io/chart?c={type:'line',data:{labels:" +
+                                      header_list.toString() +
+                                      ",datasets:[{label:'" +
+                                      receivedData['product_name'] +
+                                      "',fill: false, borderColor: 'rgb(37, 189, 176)',data:" +
+                                      data_list.toString() +
+                                      "} ]}}")),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
                       ),
                     ]),
               ),
