@@ -28,6 +28,7 @@ dependencies:
   url_launcher: 
   permission_handler: ^10.4.5
   share: ^2.0.4
+  http: ^1.2.0
 
 
 dev_dependencies:

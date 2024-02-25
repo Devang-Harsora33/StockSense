@@ -342,25 +342,174 @@ class _MyProductsState extends State<MyProducts> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 0, 0, 0),
-                child: InkWell(
-                  onTap: () async {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .collection("products")
-                        .doc(product_id)
-                        .delete()
-                        .then((value) => {
-                              Get.snackbar(
-                                "Success",
-                                "Product Deleted Successfully",
-                              )
-                            });
-                  },
-                  child: Icon(
-                    Icons.delete_outline_outlined,
-                    color: secondaryColor,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    InkWell(
+                      onTap: () async {
+                        var rate = TextEditingController();
+                        var profit = TextEditingController();
+                        Get.bottomSheet(Container(
+                            padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                            color: Colors.white,
+                            height: 230,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(0, 10, 0, 5),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: thirdColor,
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Center(
+                                    child: TextFormField(
+                                      validator: (value) {
+                                        if (value!.isEmpty)
+                                          return "Enter Updated Rate";
+                                      },
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                      controller: rate,
+                                      cursorColor: Colors.black,
+                                      decoration: const InputDecoration(
+                                        hintText: "Enter Updated Rate",
+                                        hintStyle: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            color: secondaryColor),
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  margin: const EdgeInsets.fromLTRB(0, 0, 0, 5),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      color: thirdColor,
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Center(
+                                    child: TextFormField(
+                                      validator: (value) {
+                                        if (value!.isEmpty)
+                                          return "Enter Updated Profit";
+                                      },
+                                      autovalidateMode:
+                                          AutovalidateMode.onUserInteraction,
+                                      controller: profit,
+                                      cursorColor: Colors.black,
+                                      decoration: const InputDecoration(
+                                        hintText: "Enter Updated Profit",
+                                        hintStyle: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            color: secondaryColor),
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () async {
+                                    if (rate.text.isNotEmpty) {
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(FirebaseAuth
+                                              .instance.currentUser!.uid)
+                                          .collection("products")
+                                          .doc(product_id)
+                                          .update({
+                                        'product_rate': rate.text,
+                                      }).then((value) => {
+                                                Get.snackbar(
+                                                  "Success",
+                                                  "Product Updated Successfully",
+                                                )
+                                              });
+                                    }
+                                    if (profit.text.isNotEmpty) {
+                                      await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(FirebaseAuth
+                                              .instance.currentUser!.uid)
+                                          .collection("products")
+                                          .doc(product_id)
+                                          .update({
+                                        'product_profit': profit.text
+                                      }).then((value) => {
+                                                Get.snackbar(
+                                                  "Success",
+                                                  "Product Updated Successfully",
+                                                )
+                                              });
+                                    }
+                                  },
+                                  child: Container(
+                                    margin:
+                                        const EdgeInsets.fromLTRB(0, 5, 0, 0),
+                                    height: 60,
+                                    padding:
+                                        const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        color: primaryColor,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Update Product',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w300,
+                                            fontSize: 15,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )));
+                      },
+                      child: Icon(
+                        Icons.edit_outlined,
+                        color: secondaryColor,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(FirebaseAuth.instance.currentUser!.uid)
+                            .collection("products")
+                            .doc(product_id)
+                            .delete()
+                            .then((value) => {
+                                  Get.snackbar(
+                                    "Success",
+                                    "Product Deleted Successfully",
+                                  )
+                                });
+                      },
+                      child: Icon(
+                        Icons.delete_outline_outlined,
+                        color: secondaryColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
