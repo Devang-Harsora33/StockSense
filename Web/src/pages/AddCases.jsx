@@ -1,64 +1,138 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar"; // Assuming Navbar component is exported from './Navbar'
 import { collection, getDocs, addDoc } from "firebase/firestore";
-import { db } from "../database/firebase_config";
+import { auth, db } from "../database/firebase_config";
 import uploadImg from "/AddProducts/Group.png";
 import Aos from "aos";
+import { render } from "react-dom";
 
 const AddCases = () => {
-  const [cases, setCases] = useState([]);
-  const [newCase, setNewCase] = useState({
-    caseId: "",
-    case_title: "",
-    case_desc: "",
-    case_location: "",
-    case_category: "",
-    case_reported: null,
-    case_partyInvolved: "",
-  });
+  // const [cases, setCases] = useState([]);
+  // const [newCase, setNewCase] = useState({
+  //   caseId: "",
+  //   case_title: "",
+  //   case_desc: "",
+  //   case_location: "",
+  //   case_category: "",
+  //   case_reported: null,
+  //   case_partyInvolved: "",
+  // });
 
-  useEffect(() => {
-    const fetchCases = async () => {
-      const casesCollection = collection(db, "cases");
-      const casesSnapshot = await getDocs(casesCollection);
-      const casesData = casesSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCases(casesData);
-    };
+  // useEffect(() => {
+  //   const fetchCases = async () => {
+  //     const casesCollection = collection(db, "cases");
+  //     const casesSnapshot = await getDocs(casesCollection);
+  //     const casesData = casesSnapshot.docs.map((doc) => ({
+  //       id: doc.id,
+  //       ...doc.data(),
+  //     }));
+  //     setCases(casesData);
+  //   };
 
-    fetchCases();
-  }, []);
+  //   fetchCases();
+  // }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewCase((prevCase) => ({
-      ...prevCase,
-      [name]: value,
-    }));
-  };
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setNewCase((prevCase) => ({
+  //     ...prevCase,
+  //     [name]: value,
+  //   }));
+  // };
   useEffect(() => {
     Aos.init({
       duration: 1000,
     });
   }, []);
+  const [productName, setProductName] = useState("");
+  const [productDescription, setProductDescription] = useState("");
+  const [productRate, setProductRate] = useState("");
+  const [productProfit, setProductProfit] = useState("");
+  const [transportationCost, setTransportationCost] = useState("");
+  const [productImage, setProductImage] = useState("");
+  const [productBarcodeData, setProductBarcodeData] = useState("");
+  const [imagePreview, setImagePreview] = useState(null);
+  // console.log(db);
+  const currentUser = auth.currentUser;
+  console.log(currentUser.uid);
+  console.log(currentUser);
   const handleSubmit = async () => {
     try {
-      const docRef = await addDoc(collection(db, "cases"), newCase);
-      setNewCase({
-        caseId: "",
-        case_title: "",
-        case_desc: "",
-        case_location: "",
-        case_category: "",
-        case_reported: null,
-        case_partyInvolved: "",
-        case_status: "",
-      });
-      console.log("Document written with ID: ", docRef.id);
+      if (currentUser) {
+        await db
+          .collection("users")
+          .doc(currentUser.uid)
+          .collection("products")
+          .add({
+            product_name: productName,
+            product_description: productDescription,
+            product_rate: productRate,
+            product_profit: productProfit,
+            transportation_cost: transportationCost,
+            product_image: productImage,
+            product_barcodedata: productBarcodeData,
+            created_time: Date.now(),
+            product_id: "",
+            amount_invested: "0",
+            net_profit: "0",
+          });
+
+        // await db
+        //   .collection("users")
+        //   .doc(currentUser.uid)
+        //   .collection("products")
+        //   .doc(upload.id)
+        //   .update({
+        //     product_id: upload.id,
+        //   });
+
+        setProductName("");
+        setProductDescription("");
+        setProductRate("");
+        setProductProfit("");
+        setTransportationCost("");
+        setProductImage("");
+        setProductBarcodeData("");
+        // setTransportationCost("");
+
+        alert("Product Added Successfully");
+      } else {
+        console.error("No user logged in");
+      }
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error Adding Product:", error);
+
+      alert("Error Adding Product");
+    }
+  };
+
+  // Add event handlers to update state for form inputs
+  const handleProductNameChange = (e) => {
+    setProductName(e.target.value);
+  };
+
+  const handleProductDescriptionChange = (e) => {
+    setProductDescription(e.target.value);
+  };
+  const handleProductRate = (e) => {
+    setProductRate(e.target.value);
+  };
+  const handleProductProfit = (e) => {
+    setProductProfit(e.target.value);
+  };
+  const handleProductTransportationCostChange = (e) => {
+    setTransportationCost(e.target.value);
+  };
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setProductImage(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
   const timestampToDatetimeLocalString = (timestamp) => {
@@ -110,9 +184,9 @@ const AddCases = () => {
             </label>
             <input
               type="text"
-              name="caseId"
-              value={newCase.caseId}
-              onChange={handleChange}
+              name="product_Name"
+              value={productName}
+              onChange={handleProductNameChange}
               placeholder="Enter Product Title "
               className="w-full px-4 py-3  mb-3 bg-[#fcfcfc] text-[#8391A1] font-urbanist border rounded-lg  focus:outline-none focus:border-gray-600"
             />
@@ -124,9 +198,9 @@ const AddCases = () => {
               Product Description:
             </label>
             <textarea
-              name="case_desc"
-              value={newCase.case_desc}
-              onChange={handleChange}
+              name="product_desc"
+              value={productDescription}
+              onChange={handleProductDescriptionChange}
               placeholder="Enter a product description or remark"
               rows={6}
               cols={50}
@@ -139,10 +213,10 @@ const AddCases = () => {
               Product Rate:
             </label>
             <input
-              type="number"
-              name="case_location"
-              value={newCase.case_location}
-              onChange={handleChange}
+              type="text"
+              name="product_rate"
+              value={productRate}
+              onChange={handleProductRate}
               placeholder="Enter product rate per unit"
               className="w-full px-4 py-3  mb-3 bg-[#fcfcfc] text-[#8391A1] font-urbanist border rounded-lg  focus:outline-none focus:border-gray-600"
             />
@@ -153,10 +227,10 @@ const AddCases = () => {
               Product Profit:
             </label>
             <input
-              type="number"
-              name="case_category"
-              value={newCase.case_category}
-              onChange={handleChange}
+              type="text"
+              name="product_profit"
+              value={productProfit}
+              onChange={handleProductProfit}
               placeholder="Enter profit amount per unit"
               className="w-full px-4 py-3  mb-3 bg-[#fcfcfc] text-[#8391A1] font-urbanist border rounded-lg  focus:outline-none focus:border-gray-600"
             />
@@ -168,10 +242,10 @@ const AddCases = () => {
             </label>
             <input
               type="text"
-              name="case_partyInvolved"
-              value={newCase.case_partyInvolved}
-              onChange={handleChange}
-              placeholder="Enter transportation cost per unit"
+              name="product_cost"
+              value={transportationCost}
+              onChange={handleProductTransportationCostChange}
+              placeholder="Enter profit amount per unit"
               className="w-full px-4 py-3  mb-3 bg-[#fcfcfc] text-[#8391A1] font-urbanist border rounded-lg  focus:outline-none focus:border-gray-600"
             />
             {/* <input
@@ -182,13 +256,31 @@ const AddCases = () => {
               className="w-full px-4 py-3  mb-3 bg-[#fcfcfc] text-[#8391A1] font-urbanist border rounded-lg  focus:outline-none focus:border-gray-600"
             /> */}
 
-            <button
+            {/* <button
               onClick={handleSubmit}
               className=" w-full py-3 px-4 mb-3 mt-4 flex justify-center gap-x-8 items-center bg-emerald_green text-white font-urbanist rounded-lg hover:bg-dark_emerald_green transition-all ease-in-out focus:outline-none focus:bg-emerald_green"
             >
               Upload Image of the Product
               <img src={uploadImg} alt="upload" />
-            </button>
+            </button> */}
+            <input
+              type="file"
+              accept="image/*"
+              placeholder="Upload an image of your product"
+              onChange={handleImageUpload}
+              // style={{ display: "none" }}
+              className=" w-full py-3 px-4 mb-3 mt-4 flex justify-center gap-x-8 items-center bg-emerald_green text-white font-urbanist rounded-lg hover:bg-dark_emerald_green transition-all ease-in-out focus:outline-none focus:bg-emerald_green"
+              // id="upload-input"
+            />
+            <div className=" w-full flex justify-start items-center">
+              {imagePreview && (
+                <img
+                  src={imagePreview}
+                  alt="preview"
+                  style={{ maxWidth: "100%", maxHeight: "200px" }}
+                />
+              )}
+            </div>
             <button
               onClick={handleSubmit}
               className="block w-full py-3 px-4 mt-12 bg-emerald_green text-white font-urbanist rounded-lg hover:bg-dark_emerald_green transition-all ease-in-out focus:outline-none focus:bg-emerald_green"

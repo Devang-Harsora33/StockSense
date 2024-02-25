@@ -9,8 +9,9 @@ import Details from "./Details";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { DeleteOutline, Inventory } from "@mui/icons-material";
+import { Tab, Tabs } from "@mui/material";
 
-const TotalProducts = () => {
+const MyInventory = () => {
   useEffect(() => {
     AOS.init({
       duration: 1000,
@@ -31,9 +32,46 @@ const TotalProducts = () => {
       console.error("Error deleting product:", error);
     }
   };
+  const activeMonth = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+  const [value, setValue] = useState(activeMonth);
+
+  const handleChange = (event, newValue) => {
+    setValue(months[newValue]);
+    console.log(months[newValue]);
+  };
+  const months = [
+    new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      "en-US",
+      { month: "long", year: "numeric" }
+    ),
+    new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      "en-US",
+      { month: "long", year: "numeric" }
+    ),
+    new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      "en-US",
+      { month: "long", year: "numeric" }
+    ),
+    new Date(Date.now() - 120 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      "en-US",
+      { month: "long", year: "numeric" }
+    ),
+    new Date(Date.now() - 150 * 24 * 60 * 60 * 1000).toLocaleDateString(
+      "en-US",
+      { month: "long", year: "numeric" }
+    ),
+  ];
+
+  //   console.log(months);
+  //   console.log(activeMonth);
+
   useEffect(() => {
     const fetchproducts = async () => {
-      const productsCollection = collection(db, "users", uid, "products");
+      const productsCollection = collection(db, "users", uid, value);
       const productsSnapshot = await getDocs(productsCollection);
       const productsData = productsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -43,7 +81,7 @@ const TotalProducts = () => {
     };
 
     fetchproducts();
-  }, []);
+  }, [uid, value]);
   console.log(products);
   // const navigate = useNavigate();
   const handleCaseClick = (productId) => {
@@ -59,13 +97,34 @@ const TotalProducts = () => {
   // };
   return (
     <>
-      <section className="flex relative w-[100%] gap-x-10">
+      <section className="flex relative w-[100%] gap-x-10 overflow-hidden h-[100vh]">
         <Navbar />
-        <div className="w-[100%] mt-12 flex flex-col overflow-hidden">
+        <div className="w-[100%] mt-12 flex flex-col ">
           <p data-aos="fade-left" className="w-[100%] text-4xl flex mb-[3rem]">
-            Total Products
+            My Inventory
           </p>
-          <div className=" overflow-y-scroll overflow-x-hidden h-[40rem]">
+          <div className=" w-full flex justify-center items-center mb-6">
+            <Tabs
+              value={value}
+              onChange={handleChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              aria-label="scrollable auto tabs example"
+              textColor="primary"
+              indicatorColor="primary"
+              centered
+              sx={{
+                borderRadius: "8px",
+                width: "80%",
+              }}
+            >
+              {/* <Tab label={activeMonth} /> */}
+              {months.map((month, index) => (
+                <Tab key={index} label={month} />
+              ))}
+            </Tabs>
+          </div>
+          <div className=" overflow-y-scroll overflow-x-hidden h-[33rem]">
             {products.map((productDetails) => (
               <div
                 data-aos="fade-left"
@@ -165,4 +224,4 @@ const TotalProducts = () => {
   );
 };
 
-export default TotalProducts;
+export default MyInventory;

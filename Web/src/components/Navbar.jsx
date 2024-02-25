@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../database/firebase_config";
 
 import login from "/Login/login.png";
-import logout from "/Login/logout.png";
+import logout from "/Login/logout.svg";
 
 const Navbar = () => {
   const [open, setOpen] = useState(true);
@@ -13,12 +13,7 @@ const Navbar = () => {
     { title: "Dashboard", src: "Chart_fill", link: "/homepage" },
     { title: "Add Product", src: "Chat", link: "/addProduct" },
     { title: "Total Products", src: "Chat", link: "/totalProducts" },
-    { title: "Assigned Cases", src: "Chart", link: "/assigned" },
-    { title: "Pending Cases", src: "User", gap: true, link: "/pending" },
-    { title: "OnGoing Cases", src: "Calendar", link: "/onGoing" },
-    { title: "Completed Cases", src: "Search", link: "/completed" },
-    // { title: "Files", src: "Folder", gap: true, link: "/files" },
-    // { title: "Setting", src: "Setting", link: "/login" },
+    { title: "My Inventory", src: "Chart", link: "/myInventory" },
   ];
   const [user, setUser] = useState(null);
   useEffect(() => {

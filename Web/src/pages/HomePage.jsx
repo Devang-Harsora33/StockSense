@@ -23,71 +23,93 @@ import { collection, getDocs } from "firebase/firestore";
 
 const HomePage = () => {
   const [user, setUser] = useState(null);
-  const [assigned, setassigned] = useState(0);
-  const [pending, setpending] = useState(0);
-  const [completed, setcompleted] = useState(0);
-  const [onGoing, setonGoing] = useState(0);
   const [revenue, setRevenue] = useState(0);
-  const [cases, setCases] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [totalProductCount, setTotalProductCount] = useState([]);
+  const [totalAmountInvested, setTotalAmountInvested] = useState("");
+  const [totalAmountProfit, setTotalAmountProfit] = useState("");
+  const [totalTranspotationCost, setTotalTranspotationCost] = useState("");
+  const currentUser = auth.currentUser;
+  const uid = currentUser.uid;
 
   useEffect(() => {
-    const fetchCases = async () => {
+    const fetchProducts = async () => {
       try {
-        const casesCollection = collection(db, "cases");
-        const querySnapshot = await getDocs(casesCollection);
-        const caseData = querySnapshot.docs.map((doc) => ({
+        const ProductsCollection = collection(db, "users", uid, "products");
+        const querySnapshot = await getDocs(ProductsCollection);
+        const productData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setCases(caseData);
+        const totalAmountInvested = productData.reduce((total, product) => {
+          return total + parseFloat(product.amount_invested.replace(/,/g, ""));
+        }, 0);
+        const totalAmountProfit = productData.reduce((total, product) => {
+          return total + parseFloat(product.total_profit.replace(/,/g, ""));
+        }, 0);
+        const totalTranspotationCost = productData.reduce((total, product) => {
+          return (
+            total + parseFloat(product.transportation_cost.replace(/,/g, ""))
+          );
+        }, 0);
+
+        setProducts(productData);
+        setTotalProductCount(productData.length);
+        setTotalAmountInvested(totalAmountInvested.toLocaleString("en-IN"));
+        setTotalTranspotationCost(
+          totalTranspotationCost.toLocaleString("en-IN")
+        );
+        setTotalAmountProfit(totalAmountProfit.toLocaleString("en-IN"));
+        setTotalAmountProfit(totalAmountProfit.toLocaleString("en-IN"));
       } catch (error) {
-        console.error("Error fetching cases:", error);
+        console.error("Error fetching Products:", error);
       }
     };
-
-    fetchCases();
-  }, []);
+    fetchProducts();
+  }, [uid]);
+  // const formattedTime = new Date(products.created_time).toLocaleString();
+  // console.log(formattedTime);
   useEffect(() => {
     AOS.init({
       duration: 1000,
       once: true,
     });
   }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const casesCollection = collection(db, "cases");
-        const casesSnapshot = await getDocs(casesCollection);
-        let assignedCount = 0;
-        let pendingCount = 0;
-        let completedCount = 0;
-        let onGoingCount = 0;
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const ProductsCollection = collection(db, "Products");
+  //       const ProductsSnapshot = await getDocs(ProductsCollection);
+  //       let assignedCount = 0;
+  //       let pendingCount = 0;
+  //       let completedCount = 0;
+  //       let onGoingCount = 0;
 
-        casesSnapshot.forEach((doc) => {
-          const status = doc.data().current_status;
-          if (status === "assigned") {
-            assignedCount++;
-          } else if (status === "pending") {
-            pendingCount++;
-          } else if (status === "completed") {
-            completedCount++;
-          } else if (status === "onGoing") {
-            onGoingCount++;
-          }
-        });
+  //       ProductsSnapshot.forEach((doc) => {
+  //         const status = doc.data().current_status;
+  //         if (status === "assigned") {
+  //           assignedCount++;
+  //         } else if (status === "pending") {
+  //           pendingCount++;
+  //         } else if (status === "completed") {
+  //           completedCount++;
+  //         } else if (status === "onGoing") {
+  //           onGoingCount++;
+  //         }
+  //       });
 
-        setassigned(assignedCount);
-        setpending(pendingCount);
-        setcompleted(completedCount);
-        setonGoing(onGoingCount);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  //       setassigned(assignedCount);
+  //       setpending(pendingCount);
+  //       setcompleted(completedCount);
+  //       setonGoing(onGoingCount);
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
-
+  //   fetchData();
+  // }, []);
+  // console.log(Date.now());
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -100,18 +122,6 @@ const HomePage = () => {
     return () => unsubscribe();
   }, []);
   const navigate = useNavigate();
-  function GetUserID() {
-    const [userID, setUID] = useState(null);
-    useEffect(() => {
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          setUID(user.uid);
-        }
-      });
-    }, []);
-    return userID;
-  }
-  const uid = GetUserID();
 
   if (!user) {
     return null;
@@ -154,8 +164,8 @@ const HomePage = () => {
                     }}
                   />
                 }
-                title={"Pending"}
-                value={pending}
+                title={"Total Products:"}
+                value={totalProductCount}
               />
               <DashboardCard
                 icon={
@@ -169,8 +179,8 @@ const HomePage = () => {
                     }}
                   />
                 }
-                title={"Assigned"}
-                value={assigned}
+                title={"Total Amount Invested:"}
+                value={totalAmountInvested}
               />
               <DashboardCard
                 icon={
@@ -184,10 +194,10 @@ const HomePage = () => {
                     }}
                   />
                 }
-                title={"OnGoing"}
-                value={onGoing}
+                title={"Total Amount Profit:"}
+                value={totalAmountProfit}
               />
-              <DashboardCard
+              {/* <DashboardCard
                 icon={
                   <UserOutlined
                     style={{
@@ -199,49 +209,59 @@ const HomePage = () => {
                     }}
                   />
                 }
-                title={"Completed"}
-                value={completed}
-              />
+                title={"Total Transportation Cost:"}
+                value={totalTranspotationCost}
+              /> */}
             </Space>
             <section className=" flex w-[100%] justify-center items-center">
               <PieChart
-                assigned={assigned}
-                pending={pending}
-                completed={completed}
-                onGoing={onGoing}
+                count1={totalProductCount}
+                count2={totalAmountInvested}
+                count3={totalAmountProfit}
               />
               <div
                 data-aos="fade-left"
                 className=" border-[1px] border-gray-400 rounded-2xl w-[50%] h-[27rem] flex flex-col p-4 overflow-y-scroll"
               >
                 <p className=" text-[#626d7a] text-2xl border-b-[1px] pb-2 border-gray-400">
-                  Recently Reported
+                  Recent Inventory Addition
                 </p>
                 <ul>
-                  {cases.map((caseItem) => (
-                    <li key={caseItem.id}>
-                      <div className=" relative p-2 border-2 border-gray-300 rounded-2xl mt-2">
-                        <p className=" text-emerald_green font-semibold text-lg mt-5">
-                          Case Title:{" "}
-                          <span className=" ml-4 text-gray-600 font-normal text-base">
-                            {caseItem.case_title}
-                          </span>
-                        </p>
-                        <div className=" flex gap-x-2">
-                          <p className=" text-emerald_green font-semibold text-lg">
-                            Description:{" "}
-                          </p>
-                          <span className=" text-gray-600 font-normal text-base">
-                            {caseItem.case_description}
-                          </span>
+                  {products.map((productItem) => (
+                    <li key={productItem.id}>
+                      <div className=" relative flex w-full gap-x-4 justify-center items-center p-2 border-2 shadow-lg bg-slate-100 border-gray-300 rounded-2xl mt-2">
+                        <div className=" w-[5rem]">
+                          <img src={productItem.product_image} alt="img" />
                         </div>
-                        <div className=" bg-emerald_green py-[0.6rem] px-4 absolute top-2 right-4 rounded-2xl">
-                          <span className=" text-white">
-                            {caseItem.current_status}
-                          </span>
+                        <div>
+                          <p className=" text-emerald_green font-semibold text-lg mt-5">
+                            Product Title:{" "}
+                            <span className=" ml-4 text-gray-600 font-normal text-base">
+                              {productItem.product_name}
+                            </span>
+                          </p>
+                          <div className=" flex gap-x-2">
+                            <p className=" text-emerald_green font-semibold text-lg">
+                              Description:{" "}
+                            </p>
+                            <span className=" text-gray-600 font-normal text-base">
+                              {productItem.product_description}
+                            </span>
+                          </div>
+                          <div className=" bg-emerald_green py-[0.6rem] px-4 absolute top-2 right-4 rounded-2xl">
+                            <span className="text-white">
+                              {productItem.created_time &&
+                              productItem.created_time.toDate &&
+                              typeof productItem.created_time.toDate ===
+                                "function"
+                                ? new Date(
+                                    productItem.created_time.toDate()
+                                  ).toLocaleDateString("en-GB")
+                                : "No reported date"}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      {/* Render other case details as needed */}
                     </li>
                   ))}
                 </ul>
