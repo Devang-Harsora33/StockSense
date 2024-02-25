@@ -36,6 +36,8 @@ class _ProductinfoState extends State<Productinfo> {
 
   var header_list = [];
   var data_list = [];
+  var rate_list = [];
+  var profit_list = [];
   var months = [
     DateFormat('MMMM yyyy').format(DateTime.now()),
     DateFormat('MMMM yyyy')
@@ -62,14 +64,42 @@ class _ProductinfoState extends State<Productinfo> {
         var total_quantity = 0;
         var quantity_sold = 0;
         var ratio = 0.0;
+        var rate = -1;
+        var profit = -1;
         value.docs.forEach((element) {
           total_quantity += int.parse(element['total_quantity']);
           quantity_sold += int.parse(element['quantity_sold']);
 
           ratio = (quantity_sold / total_quantity) * 100;
+
+          if (rate == -1) {
+            rate =
+                int.parse(element['product_rate'].toString().split(",").join());
+          } else {
+            if (rate <
+                int.parse(
+                    element['product_rate'].toString().split(",").join())) {
+              rate = int.parse(
+                  element['product_rate'].toString().split(",").join());
+            }
+          }
+
+          if (profit == -1) {
+            profit = int.parse(
+                element['product_profit'].toString().split(",").join());
+          } else {
+            if (profit <
+                int.parse(
+                    element['product_profit'].toString().split(",").join())) {
+              profit = int.parse(
+                  element['product_profit'].toString().split(",").join());
+            }
+          }
         });
         header_list.add("'" + months[i].substring(0, 3).toString() + "'");
         data_list.add(ratio);
+        rate_list.add(rate);
+        profit_list.add(profit);
       });
     }
     setState(() {
@@ -575,6 +605,24 @@ class _ProductinfoState extends State<Productinfo> {
                       SizedBox(
                         height: 30,
                       ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Product Sale Analysis",
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(
+                                color: secondaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
                       Container(
                         height: 200,
                         decoration: BoxDecoration(
@@ -586,6 +634,76 @@ class _ProductinfoState extends State<Productinfo> {
                                       receivedData['product_name'] +
                                       "',fill: false, borderColor: 'rgb(37, 189, 176)',data:" +
                                       data_list.toString() +
+                                      "} ]}}")),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Rate Change Analysis",
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(
+                                color: secondaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: NetworkImage(
+                                  "https://quickchart.io/chart?c={type:'line',data:{labels:" +
+                                      header_list.toString() +
+                                      ",datasets:[{label:'" +
+                                      receivedData['product_name'] +
+                                      "',fill: false, borderColor: 'rgb(37, 189, 176)',data:" +
+                                      rate_list.toString() +
+                                      "} ]}}")),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Rate Change Analysis",
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            style: const TextStyle(
+                                color: secondaryColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        height: 200,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image: NetworkImage(
+                                  "https://quickchart.io/chart?c={type:'line',data:{labels:" +
+                                      header_list.toString() +
+                                      ",datasets:[{label:'" +
+                                      receivedData['product_name'] +
+                                      "',fill: false, borderColor: 'rgb(37, 189, 176)',data:" +
+                                      profit_list.toString() +
                                       "} ]}}")),
                         ),
                       ),
